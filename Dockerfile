@@ -1,9 +1,9 @@
 # Stage 1: Build the Dashboard UI
 FROM node:22-alpine AS ui-builder
 WORKDIR /app
-COPY web/dashboard/package*.json ./web/dashboard/
+# Copy the entire repository so Vite can access root folders like /assets
+COPY . .
 RUN cd web/dashboard && npm ci
-COPY web/dashboard ./web/dashboard
 RUN cd web/dashboard && npm run build
 
 # Stage 2: Build the Go binary
@@ -12,7 +12,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-# Create the dist folder and copy the compiled UI into it so Go can embed it
+# Create the dist folder and copy the compiled UI into it
 RUN mkdir -p internal/dashboardui/dist
 COPY --from=ui-builder /app/web/dashboard/dist ./internal/dashboardui/dist
 
