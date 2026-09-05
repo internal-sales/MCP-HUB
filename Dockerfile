@@ -26,4 +26,4 @@ LABEL org.opencontainers.image.title="MCPJungle"
 COPY --from=go-builder /app/mcpjungle /mcpjungle
 EXPOSE 8080
 ENTRYPOINT ["/mcpjungle"]
-CMD ["start"]
+CMD ["start", "--host", "0.0.0.0"]
