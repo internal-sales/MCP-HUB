@@ -1,17 +1,16 @@
-FROM gcr.io/distroless/base
+# Stage 1: Build the Go binary
+FROM golang:1.23 AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o mcpjungle .
 
-# OCI image labels
+# Stage 2: Create the final container
+FROM gcr.io/distroless/base:latest
 LABEL org.opencontainers.image.source="https://github.com/mcpjungle/mcpjungle"
-LABEL org.opencontainers.image.description="MCPJungle - Self-hosted MCP Gateway for developers and enterprises"
 LABEL org.opencontainers.image.title="MCPJungle"
-LABEL org.opencontainers.image.vendor="mcpjungle"
-
-# The build is handled by goreleaser
-# Copy the binary from the build stage
-COPY mcpjungle /mcpjungle
-
+COPY --from=builder /app/mcpjungle /mcpjungle
 EXPOSE 8080
 ENTRYPOINT ["/mcpjungle"]
-
-# Run the Registry Server by default
 CMD ["start"]
